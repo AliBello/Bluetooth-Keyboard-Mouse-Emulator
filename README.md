@@ -20,3 +20,7 @@ This project implements a USB HID and a BLE HID device using the M5Cardputer, ca
 - <b> Mode :</b> Toggle GO button (on the edge) to change between Keyboard and Mouse
 - <b>Keyboard :</b> Default Cardputer Keys. The keyboard layout depends on the configuration of the connected PC.
 - <b> Mouse : </b>Arrow LEFT/RIGHT/UP/DOWN and 'OK' and '\\' (just above 'OK' Button)</b>
+
+## What did I modify?
+
+I replaced the keys , . / and ; with the arrow keys. I have done this with AI as I wanted a quick 'n dirty solution.
