@@ -66,17 +66,35 @@ void bluetoothKeyboard() {
 
     Keyboard_Class::KeysState status = M5Cardputer.Keyboard.keysState();
 
-    // Keys
     int count = 0;
-    for (auto key : status.hid_keys) {
-        if (count < 6) {
-            keycode[count] = key;
-            count++;
-        }
+
+    // Convert , . / ; into arrow keys
+    if (M5Cardputer.Keyboard.isKeyPressed(',') && count < 6) {
+        keycode[count++] = 0x50;  // LEFT
+    }
+    if (M5Cardputer.Keyboard.isKeyPressed('.') && count < 6) {
+        keycode[count++] = 0x51;  // DOWN
+    }
+    if (M5Cardputer.Keyboard.isKeyPressed('/') && count < 6) {
+        keycode[count++] = 0x4F;  // RIGHT
+    }
+    if (M5Cardputer.Keyboard.isKeyPressed(';') && count < 6) {
+        keycode[count++] = 0x52;  // UP
     }
 
-    if (M5Cardputer.Keyboard.isKeyPressed(' ') && count < 6) {
-        keycode[count++] = 0x2C;  // HID SPACE
+    // Add all other keys EXCEPT , . / ;
+    for (auto key : status.hid_keys) {
+        if (count >= 6) break;
+
+        // HID keycodes for , . / ;
+        if (key == 0x36 ||  // ,
+            key == 0x37 ||  // .
+            key == 0x38 ||  // /
+            key == 0x33) {  // ;
+            continue;
+        }
+
+        keycode[count++] = key;
     }
 
     // Modifiers
@@ -84,17 +102,19 @@ void bluetoothKeyboard() {
     if (status.shift) modifier |= 0x02;
     if (status.alt)   modifier |= 0x04;
 
-    // Send
+    // Send report
     uint8_t report[8] = {
         modifier, 0,
         keycode[0], keycode[1], keycode[2],
         keycode[3], keycode[4], keycode[5]
     };
+
     keyboardInput->setValue(report, sizeof(report));
     keyboardInput->notify();
 
     delay(50);
 }
+
 
 void sendEmptyReports() {
     uint8_t emptyMouseReport[4] = {0, 0, 0, 0};
