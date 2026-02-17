@@ -67,16 +67,33 @@ void usbKeyboard() {
     report.modifiers = status.modifiers;
 
     uint8_t idx = 0;
-    for (auto k : status.hid_keys) {
-        if (idx < 6) report.keys[idx++] = k;
-        else break;
-    }
 
-    if (M5Cardputer.Keyboard.isKeyPressed(' ')) {
-        const uint8_t HID_SPACE = 0x2C;
-        bool present = false;
-        for (uint8_t i = 0; i < idx; ++i) if (report.keys[i] == HID_SPACE) { present = true; break; }
-        if (!present && idx < 6) report.keys[idx++] = HID_SPACE;
+    // Replace , . / ; with arrow keys
+    if (M5Cardputer.Keyboard.isKeyPressed(',') && idx < 6)
+        report.keys[idx++] = 0x50;  // LEFT
+
+    if (M5Cardputer.Keyboard.isKeyPressed('.') && idx < 6)
+        report.keys[idx++] = 0x51;  // DOWN
+
+    if (M5Cardputer.Keyboard.isKeyPressed('/') && idx < 6)
+        report.keys[idx++] = 0x4F;  // RIGHT
+
+    if (M5Cardputer.Keyboard.isKeyPressed(';') && idx < 6)
+        report.keys[idx++] = 0x52;  // UP
+
+    // Add all other keys EXCEPT , . / ;
+    for (auto k : status.hid_keys) {
+        if (idx >= 6) break;
+
+        // HID keycodes for , . / ;
+        if (k == 0x36 ||  // ,
+            k == 0x37 ||  // .
+            k == 0x38 ||  // /
+            k == 0x33) {  // ;
+            continue;
+        }
+
+        report.keys[idx++] = k;
     }
 
     if (idx == 0 && report.modifiers == 0) {
